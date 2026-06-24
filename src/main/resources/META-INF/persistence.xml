@@ -1,66 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
              version="1.0">
-             
-    <persistence-unit name="default">
-    	<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    	<non-jta-data-source>java://comp/env/jdbc/ProyectoBackendDS</non-jta-data-source>
-    	<class>org.openxava.session.GalleryImage</class>
-    	<class>org.openxava.web.editors.DiscussionComment</class>
-    	<class>com.openxava.naviox.model.ConfigurationRecord</class>
-    	<class>com.openxava.naviox.model.Folder</class>
-    	<class>com.openxava.naviox.model.History</class>
-    	<class>com.openxava.naviox.model.Module</class>
-    	<class>com.openxava.naviox.model.ModuleRights</class>
-    	<class>com.openxava.naviox.model.Organization</class>
-    	<class>com.openxava.naviox.model.Role</class>
-    	<class>com.openxava.naviox.model.SessionRecord</class>
-    	<class>com.openxava.naviox.model.SSORecord</class>
-    	<class>com.openxava.naviox.model.User</class>
-    	<!-- Entidades registroUsuario -->
-    	<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.Usuario</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EgresadoSecundaria</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteSecundaria</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.Psicologo</class>
-    	<!-- Entidades resultaTestSeries -->
-    	<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ConfiguracionTestRazonamiento</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PreguntaSerie</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.AlternativaRespuesta</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.RespuestaEstudiante</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.NormaBaremoRazonamiento</class>
-    	<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador</class>
-        <properties>
-            <property name="javax.persistence.schema-generation.database.action" value="update"/>
-            <!-- Forzar creación/actualización automática de tablas en bfa_db -->
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
-            <!-- Dialecto PostgreSQL para generación correcta de DDL -->
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-        </properties>
-    </persistence-unit>
-                    
-    <!-- JUnit Hypersonic -->
-    <persistence-unit name="junit">
-    	<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    	<class>org.openxava.web.editors.DiscussionComment</class>
-    	<class>com.openxava.naviox.model.ConfigurationRecord</class>
-    	<class>com.openxava.naviox.model.Folder</class>
-    	<class>com.openxava.naviox.model.History</class>
-    	<class>com.openxava.naviox.model.Module</class>
-    	<class>com.openxava.naviox.model.ModuleRights</class>
-    	<class>com.openxava.naviox.model.Organization</class>
-    	<class>com.openxava.naviox.model.Role</class>
-    	<class>com.openxava.naviox.model.SessionRecord</class>
-    	<class>com.openxava.naviox.model.SSORecord</class>
-    	<class>com.openxava.naviox.model.User</class>
-        <properties>
+
+	<persistence-unit name="default">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<non-jta-data-source>java:comp/env/jdbc/ProyectoBackendDS</non-jta-data-source>
+
+		<class>org.openxava.session.GalleryImage</class>
+		<class>org.openxava.web.editors.DiscussionComment</class>
+		<class>com.openxava.naviox.model.ConfigurationRecord</class>
+		<class>com.openxava.naviox.model.Folder</class>
+		<class>com.openxava.naviox.model.History</class>
+		<class>com.openxava.naviox.model.Module</class>
+		<class>com.openxava.naviox.model.ModuleRights</class>
+		<class>com.openxava.naviox.model.Organization</class>
+		<class>com.openxava.naviox.model.Role</class>
+		<class>com.openxava.naviox.model.SessionRecord</class>
+		<class>com.openxava.naviox.model.SSORecord</class>
+		<class>com.openxava.naviox.model.User</class>
+
+		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.Usuario</class>
+		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario</class>
+		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EgresadoSecundaria</class>
+		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteSecundaria</class>
+		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.Psicologo</class>
+
+		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ConfiguracionTestRazonamiento</class>
+		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PreguntaSerie</class>
+		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.AlternativaRespuesta</class>
+		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento</class>
+		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.RespuestaEstudiante</class>
+		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.NormaBaremoRazonamiento</class>
+		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador</class>
+
+		<properties>
+			<property name="javax.persistence.schema-generation.database.action" value="none"/>
+			<property name="hibernate.hbm2ddl.auto" value="update"/>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="junit">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<class>org.openxava.web.editors.DiscussionComment</class>
+		<class>com.openxava.naviox.model.ConfigurationRecord</class>
+		<class>com.openxava.naviox.model.Folder</class>
+		<class>com.openxava.naviox.model.History</class>
+		<class>com.openxava.naviox.model.Module</class>
+		<class>com.openxava.naviox.model.ModuleRights</class>
+		<class>com.openxava.naviox.model.Organization</class>
+		<class>com.openxava.naviox.model.Role</class>
+		<class>com.openxava.naviox.model.SessionRecord</class>
+		<class>com.openxava.naviox.model.SSORecord</class>
+		<class>com.openxava.naviox.model.User</class>
+		<properties>
 			<property name="hibernate.connection.url" value="jdbc:hsqldb:hsql://localhost:1666"/>
-        </properties>
-    </persistence-unit>    
-    
+		</properties>
+	</persistence-unit>
+
 </persistence>
