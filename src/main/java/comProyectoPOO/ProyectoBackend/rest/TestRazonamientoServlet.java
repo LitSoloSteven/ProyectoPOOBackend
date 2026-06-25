@@ -75,8 +75,6 @@ public class TestRazonamientoServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 out.print("{\"error\":\"Error interno: " + e.getMessage() + "\"}");
                 e.printStackTrace();
-            } finally {
-                em.close();
             }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -91,10 +89,98 @@ public class TestRazonamientoServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String pathInfo = request.getPathInfo();
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         response.setHeader("Access-Control-Allow-Origin", "*");
+        
         PrintWriter out = response.getWriter();
-        out.print("{\"status\":\"success\", \"message\":\"POST recibido por el Servlet nativo\"}");
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+        if ("/iniciar".equals(pathInfo)) {
+            EntityManager em = XPersistence.getManager();
+            try {
+                java.util.Map<String, Object> reqBody = mapper.readValue(request.getInputStream(), java.util.Map.class);
+                String estudianteId = (String) reqBody.get("estudianteId");
+                
+                ConfiguracionTestRazonamiento config = em.createQuery(
+                    "FROM ConfiguracionTestRazonamiento", ConfiguracionTestRazonamiento.class)
+                    .setMaxResults(1)
+                    .getSingleResult();
+                    
+                comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario estudiante = null;
+                if (estudianteId != null && !estudianteId.trim().isEmpty()) {
+                    estudiante = em.find(comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario.class, estudianteId);
+                }
+
+                comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento prueba = new comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento();
+                prueba.setConfiguracion(config);
+                prueba.setEstudiante(estudiante);
+                prueba.setHoraInicio(java.time.LocalDateTime.now());
+                prueba.setEstado("EN_PROGRESO");
+
+                em.persist(prueba);
+                em.flush();
+                
+                java.util.Map<String, Object> resMap = new java.util.HashMap<>();
+                resMap.put("id", prueba.getId());
+                resMap.put("horaInicio", prueba.getHoraInicio().toString());
+                out.print(mapper.writeValueAsString(resMap));
+            } catch (javax.persistence.NoResultException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                out.print("{\"error\":\"Configuración no encontrada\"}");
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.print("{\"error\":\"" + e.getMessage() + "\"}");
+                e.printStackTrace();
+            }
+        } else if ("/finalizar".equals(pathInfo)) {
+            EntityManager em = XPersistence.getManager();
+            try {
+                java.util.Map<String, Object> reqBody = mapper.readValue(request.getInputStream(), java.util.Map.class);
+                String pruebaId = (String) reqBody.get("pruebaId");
+                List<java.util.Map<String, String>> respuestas = (List<java.util.Map<String, String>>) reqBody.get("respuestas");
+                
+                comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento prueba = em.find(comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento.class, pruebaId);
+                if (prueba == null) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    out.print("{\"error\":\"Prueba no encontrada\"}");
+                    return;
+                }
+
+                prueba.setHoraFinalizacion(java.time.LocalDateTime.now());
+
+                if (respuestas != null) {
+                    for (java.util.Map<String, String> item : respuestas) {
+                        comProyectoPOO.ProyectoBackend.model.resultaTestSeries.RespuestaEstudiante respuesta = new comProyectoPOO.ProyectoBackend.model.resultaTestSeries.RespuestaEstudiante();
+                        respuesta.setPrueba(prueba);
+                        respuesta.setFechaRegistro(java.time.LocalDateTime.now());
+                        
+                        AlternativaRespuesta alternativa = em.find(AlternativaRespuesta.class, item.get("alternativaId"));
+                        respuesta.setAlternativaSeleccionada(alternativa);
+                        
+                        em.persist(respuesta);
+                    }
+                }
+                em.flush(); // Guardamos respuestas para que el motor las encuentre
+
+                comProyectoPOO.ProyectoBackend.model.resultaTestSeries.MotorCalificacionService motor = new comProyectoPOO.ProyectoBackend.model.resultaTestSeries.MotorCalificacionService();
+                Integer puntuacion = motor.calificarCompleto(prueba);
+                
+                java.util.Map<String, Object> resMap = new java.util.HashMap<>();
+                resMap.put("estado", prueba.getEstado());
+                resMap.put("puntuacionDirecta", puntuacion);
+                resMap.put("percentil", prueba.getPercentilObtenido() == null ? 0 : prueba.getPercentilObtenido());
+                out.print(mapper.writeValueAsString(resMap));
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.print("{\"error\":\"" + e.getMessage() + "\"}");
+                e.printStackTrace();
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            out.print("{\"error\":\"Ruta POST no encontrada en el Servlet nativo\"}");
+        }
     }
     
     @Override
