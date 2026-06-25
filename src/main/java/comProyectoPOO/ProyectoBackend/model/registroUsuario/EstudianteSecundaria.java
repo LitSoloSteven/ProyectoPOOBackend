@@ -25,4 +25,8 @@ public class EstudianteSecundaria extends Usuario {
 	@Required
 	private String tipoInstitucion; // Público o Privado
 
+	@Enumerated(EnumType.STRING)
+	@Required
+	private Zona zona;
+
 }

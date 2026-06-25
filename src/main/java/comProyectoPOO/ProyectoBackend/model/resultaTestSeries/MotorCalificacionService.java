@@ -51,8 +51,6 @@ public class MotorCalificacionService {
 	 * Valida si el aspirante completó la prueba dentro del límite de tiempo.
 	 * El límite estricto es de 12 minutos según la BFA.
 	 *
-	 * CAMBIO: Se usa ChronoUnit.SECONDS para evitar que el truncamiento de
-	 * ChronoUnit.MINUTES permita tiempos como 12m59s pasar como válidos.
 	 * El límite se convierte a segundos exactos (ej. 12 min = 720 seg).
 	 *
 	 * @param intento La prueba de razonamiento a validar
@@ -63,7 +61,7 @@ public class MotorCalificacionService {
 			return false;
 		}
 
-		// CAMBIO: Cálculo estricto en segundos para evitar truncamiento de decimales
+		// Cálculo estricto en segundos para evitar truncamiento de decimales
 		long segundosUsados = ChronoUnit.SECONDS.between(
 			intento.getHoraInicio(),
 			intento.getHoraFinalizacion()
