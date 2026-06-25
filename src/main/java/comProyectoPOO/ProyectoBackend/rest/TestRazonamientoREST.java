@@ -94,7 +94,7 @@ public class TestRazonamientoREST {
 
             PruebaDeRazonamiento prueba = new PruebaDeRazonamiento();
             prueba.setConfiguracion(config);
-            prueba.setEstudiante(estudiante);
+            prueba.setAspirante(estudiante);
             prueba.setHoraInicio(LocalDateTime.now());
             prueba.setEstado("EN_PROGRESO");
 

@@ -76,6 +76,117 @@ public class TestRazonamientoServlet extends HttpServlet {
                 out.print("{\"error\":\"Error interno: " + e.getMessage() + "\"}");
                 e.printStackTrace();
             }
+        } else if ("/resultados-globales".equals(pathInfo)) {
+            EntityManager em = XPersistence.getManager();
+            try {
+                java.util.List<comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento> pruebas = em.createQuery(
+                    "SELECT p FROM PruebaDeRazonamiento p WHERE p.estado = 'FINALIZADO' ORDER BY p.horaInicio DESC", 
+                    comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento.class)
+                    .getResultList();
+
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                
+                List<java.util.Map<String, Object>> resultList = new java.util.ArrayList<>();
+                for (comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento p : pruebas) {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("id", p.getId());
+                    
+                    comProyectoPOO.ProyectoBackend.model.registroUsuario.Usuario aspi = p.getAspirante();
+                    if (aspi != null) {
+                        map.put("aspiranteNombres", aspi.getNombres());
+                        map.put("aspiranteApellidos", aspi.getApellidos());
+                        
+                        Object unproxiedAspi = org.hibernate.Hibernate.unproxy(aspi);
+                        
+                        if (unproxiedAspi instanceof comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario) {
+                            comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario eu = (comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario) unproxiedAspi;
+                            map.put("tipoAspirante", "Universitario");
+                            map.put("cedulaOCif", eu.getCif());
+                            map.put("zona", eu.getZona() != null ? eu.getZona().name() : "N/A");
+                            map.put("institucion", "UAM");
+                        } else if (unproxiedAspi instanceof comProyectoPOO.ProyectoBackend.model.registroUsuario.EgresadoSecundaria) {
+                            comProyectoPOO.ProyectoBackend.model.registroUsuario.EgresadoSecundaria es = (comProyectoPOO.ProyectoBackend.model.registroUsuario.EgresadoSecundaria) unproxiedAspi;
+                            map.put("tipoAspirante", "Secundaria Egresado");
+                            map.put("cedulaOCif", es.getNumeroCedula());
+                            map.put("zona", es.getZona() != null ? es.getZona().name() : "N/A");
+                            map.put("institucion", es.getTipoInstitucion() != null ? es.getTipoInstitucion() : "N/A");
+                        } else if (unproxiedAspi instanceof comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteSecundaria) {
+                            comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteSecundaria es2 = (comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteSecundaria) unproxiedAspi;
+                            map.put("tipoAspirante", "Estudiante Secundaria");
+                            map.put("cedulaOCif", "N/A"); 
+                            map.put("zona", es2.getZona() != null ? es2.getZona().name() : "N/A");
+                            map.put("institucion", es2.getTipoInstitucion() != null ? es2.getTipoInstitucion() : "N/A");
+                        } else {
+                            map.put("tipoAspirante", "Desconocido");
+                            map.put("cedulaOCif", "N/A");
+                            map.put("zona", "N/A");
+                            map.put("institucion", "N/A");
+                        }
+                    } else {
+                        map.put("aspiranteNombres", "Desconocido");
+                        map.put("aspiranteApellidos", "");
+                        map.put("tipoAspirante", "N/A");
+                        map.put("cedulaOCif", "N/A");
+                        map.put("zona", "N/A");
+                        map.put("institucion", "N/A");
+                    }
+                    
+                    if (p.getHoraInicio() != null) {
+                        map.put("horaInicio", new int[] {
+                            p.getHoraInicio().getYear(),
+                            p.getHoraInicio().getMonthValue(),
+                            p.getHoraInicio().getDayOfMonth(),
+                            p.getHoraInicio().getHour(),
+                            p.getHoraInicio().getMinute()
+                        });
+                    }
+                    
+                    map.put("puntuacionDirecta", p.getPuntuacionDirectaObtenida());
+                    map.put("percentil", p.getPercentilObtenido());
+                    
+                    List<java.util.Map<String, Object>> respuestasList = new java.util.ArrayList<>();
+                    if (p.getRespuestas() != null) {
+                        for (comProyectoPOO.ProyectoBackend.model.resultaTestSeries.RespuestaEstudiante r : p.getRespuestas()) {
+                            java.util.Map<String, Object> rMap = new java.util.HashMap<>();
+                            if (r.getAlternativaSeleccionada() != null) {
+                                comProyectoPOO.ProyectoBackend.model.resultaTestSeries.AlternativaRespuesta alt = r.getAlternativaSeleccionada();
+                                comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PreguntaSerie preg = alt.getPregunta();
+                                rMap.put("ordenPregunta", preg.getOrden());
+                                rMap.put("letraMarcada", alt.getLetra());
+                                rMap.put("esCorrecta", alt.isEsCorrecta());
+                                rMap.put("textoRespuesta", alt.getTexto());
+                            }
+                            respuestasList.add(rMap);
+                        }
+                    }
+                    map.put("respuestas", respuestasList);
+                    
+                    // Buscar si existe un ReporteEvaluador para esta prueba
+                    java.util.List<comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador> reportes = em.createQuery(
+                        "SELECT r FROM ReporteEvaluador r WHERE r.prueba.id = :pid", comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador.class)
+                        .setParameter("pid", p.getId())
+                        .setMaxResults(1)
+                        .getResultList();
+                        
+                    if (!reportes.isEmpty()) {
+                        comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador rep = reportes.get(0);
+                        map.put("tieneReporte", true);
+                        map.put("observacionesEvaluador", rep.getObservacionesEvaluador());
+                        map.put("requiereEntrevista", rep.getRequiereEntrevista());
+                    } else {
+                        map.put("tieneReporte", false);
+                        map.put("observacionesEvaluador", "");
+                        map.put("requiereEntrevista", false);
+                    }
+                    
+                    resultList.add(map);
+                }
+                out.print(mapper.writeValueAsString(resultList));
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.print("{\"error\":\"Error interno: " + escapeJson(e.getMessage()) + "\"}");
+                e.printStackTrace();
+            }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             out.print("{\"error\":\"Ruta no encontrada en el Servlet nativo\"}");
@@ -108,14 +219,14 @@ public class TestRazonamientoServlet extends HttpServlet {
                     .setMaxResults(1)
                     .getSingleResult();
                     
-                comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario estudiante = null;
+                comProyectoPOO.ProyectoBackend.model.registroUsuario.Usuario usr = null;
                 if (estudianteId != null && !estudianteId.trim().isEmpty()) {
-                    estudiante = em.find(comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario.class, estudianteId);
+                    usr = em.find(comProyectoPOO.ProyectoBackend.model.registroUsuario.Usuario.class, estudianteId);
                 }
 
                 comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento prueba = new comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento();
                 prueba.setConfiguracion(config);
-                prueba.setEstudiante(estudiante);
+                prueba.setAspirante(usr);
                 prueba.setHoraInicio(java.time.LocalDateTime.now());
                 prueba.setEstado("EN_PROGRESO");
 
@@ -176,7 +287,52 @@ public class TestRazonamientoServlet extends HttpServlet {
                 out.print(mapper.writeValueAsString(resMap));
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                out.print("{\"error\":\"" + e.getMessage() + "\"}");
+                out.print("{\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
+                e.printStackTrace();
+            }
+        } else if ("/guardar-reporte".equals(pathInfo)) {
+            EntityManager em = XPersistence.getManager();
+            try {
+                java.util.Map<String, Object> reqBody = mapper.readValue(request.getInputStream(), java.util.Map.class);
+                String pruebaId = (String) reqBody.get("pruebaId");
+                String observaciones = (String) reqBody.get("observaciones");
+                Boolean requiereEntrevista = (Boolean) reqBody.get("requiereEntrevista");
+                
+                comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento prueba = em.find(comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PruebaDeRazonamiento.class, pruebaId);
+                if (prueba == null) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    out.print("{\"error\":\"Prueba no encontrada\"}");
+                    return;
+                }
+                
+                // Buscar reporte existente
+                java.util.List<comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador> reportes = em.createQuery(
+                    "SELECT r FROM ReporteEvaluador r WHERE r.prueba.id = :pid", comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador.class)
+                    .setParameter("pid", pruebaId)
+                    .setMaxResults(1)
+                    .getResultList();
+                    
+                comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador reporte;
+                if (!reportes.isEmpty()) {
+                    reporte = reportes.get(0);
+                } else {
+                    reporte = new comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador();
+                    reporte.setPrueba(prueba);
+                }
+                
+                reporte.setFechaGeneracion(java.time.LocalDateTime.now());
+                reporte.setObservacionesEvaluador(observaciones);
+                reporte.setRequiereEntrevista(requiereEntrevista != null ? requiereEntrevista : false);
+                
+                if (reportes.isEmpty()) {
+                    em.persist(reporte);
+                }
+                em.flush();
+                
+                out.print("{\"success\":true}");
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.print("{\"error\":\"Error interno: " + escapeJson(e.getMessage()) + "\"}");
                 e.printStackTrace();
             }
         } else {

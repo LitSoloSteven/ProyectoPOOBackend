@@ -28,18 +28,6 @@ public class PruebaDeRazonamiento {
 	@Hidden
 	private String id;
 
-	/**
-	 * Identificador externo del aspirante (para quienes no son estudiantes UAM).
-	 *
-	 * <p><b>Restricción de Exclusión Mutua (XOR):</b> Este campo y {@link #estudiante}
-	 * son mutuamente excluyentes. Un intento de prueba debe pertenecer a exactamente uno
-	 * de los dos: un {@code EstudianteUniversitario} registrado (vía {@link #estudiante})
-	 * o un aspirante externo (vía este campo). Nunca ambos simultáneamente ni ambos nulos.</p>
-	 *
-	 * @see #estudiante
-	 */
-	@Column(length = 100)
-	private String identificadorAspiranteExterno;
 
 	private LocalDateTime horaInicio;
 
@@ -66,20 +54,13 @@ public class PruebaDeRazonamiento {
 	private ConfiguracionTestRazonamiento configuracion;
 
 	/**
-	 * Estudiante universitario UAM que realizó esta prueba.
-	 *
-	 * <p><b>Restricción de Exclusión Mutua (XOR):</b> Este campo y
-	 * {@link #identificadorAspiranteExterno} son mutuamente excluyentes.
-	 * Un intento de prueba debe pertenecer a exactamente uno de los dos:
-	 * un estudiante UAM (vía este campo) o un aspirante externo
-	 * (vía {@link #identificadorAspiranteExterno}). Nunca ambos simultáneamente
-	 * ni ambos nulos.</p>
-	 *
-	 * @see #identificadorAspiranteExterno
+	 * Usuario que realizó esta prueba.
+	 * Gracias a la herencia JOINED, OpenXava mostrará los datos específicos
+	 * dependiendo de si es EstudianteUniversitario, EgresadoSecundaria, o EstudianteSecundaria.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "estudiante_id")
-	private EstudianteUniversitario estudiante;
+	@JoinColumn(name = "usuario_id")
+	private Usuario aspirante;
 
 	@OneToMany(mappedBy = "prueba", cascade = CascadeType.ALL)
 	private List<RespuestaEstudiante> respuestas = new ArrayList<>();

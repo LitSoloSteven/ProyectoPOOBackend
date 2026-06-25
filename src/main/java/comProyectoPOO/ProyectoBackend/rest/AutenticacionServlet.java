@@ -94,6 +94,28 @@ public class AutenticacionServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 out.print("{\"error\":\"Estudiante no encontrado o CIF inválido\"}");
             }
+        } else if ("/login-administrativo".equals(pathInfo)) {
+            try {
+                Map<String, Object> reqBody = mapper.readValue(request.getInputStream(), Map.class);
+                String cif = (String) reqBody.get("cif");
+                String contrasena = (String) reqBody.get("contrasena");
+                EntityManager em = XPersistence.getManager();
+                comProyectoPOO.ProyectoBackend.model.registroUsuario.Evaluador evaluador = em.createQuery("SELECT e FROM Evaluador e WHERE e.cif = :cif", comProyectoPOO.ProyectoBackend.model.registroUsuario.Evaluador.class)
+                    .setParameter("cif", cif)
+                    .setMaxResults(1)
+                    .getSingleResult();
+                
+                // Nota: En un sistema real usaríamos BCrypt. Aquí verificamos coincidencia exacta o básica
+                if (evaluador.getContrasenaEncriptada() != null && evaluador.getContrasenaEncriptada().equals(contrasena)) {
+                    out.print("{\"id\":\"" + evaluador.getId() + "\", \"nombres\":\"" + escapeJson(evaluador.getNombres()) + "\"}");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    out.print("{\"error\":\"Contraseña incorrecta\"}");
+                }
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                out.print("{\"error\":\"Evaluador no encontrado o CIF inválido\"}");
+            }
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             out.print("{\"error\":\"Ruta no encontrada en el AutenticacionServlet\"}");

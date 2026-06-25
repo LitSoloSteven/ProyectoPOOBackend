@@ -80,14 +80,10 @@ public class AutenticacionService {
 		if (anioGraduacion != null) {
 			// Es un egresado de secundaria
 			EgresadoSecundaria egresado = new EgresadoSecundaria();
-			egresado.setNombreEscuelaSecundaria(nombreEscuela);
-			egresado.setAnioGraduacion(anioGraduacion);
 			nuevo = egresado;
 		} else {
 			// Es un estudiante de secundaria activo
 			EstudianteSecundaria estudiante = new EstudianteSecundaria();
-			estudiante.setNombreEscuelaSecundaria(nombreEscuela);
-			estudiante.setAnioCursado(gradoActual);
 			nuevo = estudiante;
 		}
 

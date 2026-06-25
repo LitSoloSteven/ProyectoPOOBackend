@@ -16,10 +16,6 @@ import lombok.*;
 @Getter @Setter
 public class EstudianteSecundaria extends Usuario {
 
-	@Column(length = 150)
-	private String nombreEscuelaSecundaria;
-
-	private Integer anioCursado;
 
 	@Column(length = 50)
 	@Required
