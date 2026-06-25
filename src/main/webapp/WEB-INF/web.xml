@@ -26,4 +26,13 @@
     <url-pattern>/api/test-razonamiento/*</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>AutenticacionServlet</servlet-name>
+    <servlet-class>comProyectoPOO.ProyectoBackend.rest.AutenticacionServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AutenticacionServlet</servlet-name>
+    <url-pattern>/api/auth/*</url-pattern>
+  </servlet-mapping>
+
 </web-app>
