@@ -8,7 +8,7 @@ import lombok.*;
 
 /**
  * Estudiante universitario activo de la UAM.
- * Hereda de Usuario y agrega su CIF (Carnet de Identificación).
+ * Hereda de Usuario y agrega su CIF y número de cédula.
  */
 @Entity
 @Table(name = "estudiante_universitario")
@@ -19,5 +19,9 @@ public class EstudianteUniversitario extends Usuario {
 	@Column(length = 50)
 	@Required
 	private String cif;
+
+	@Column(length = 50)
+	@Required
+	private String numeroCedula;
 
 }

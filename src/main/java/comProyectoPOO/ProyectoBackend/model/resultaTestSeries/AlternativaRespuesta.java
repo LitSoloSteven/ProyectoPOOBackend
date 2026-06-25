@@ -22,8 +22,9 @@ public class AlternativaRespuesta {
 	@Hidden
 	private String id;
 
-	@Column(nullable = false)
-	private char letra; // 'A', 'B', 'C' o 'D'
+	@Column(length = 1, nullable = false)
+	@Required
+	private String letra; // 'A', 'B', 'C' o 'D'
 
 	@Column(length = 500, nullable = false)
 	@Required

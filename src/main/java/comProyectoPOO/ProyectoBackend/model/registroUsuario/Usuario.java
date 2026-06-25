@@ -1,5 +1,8 @@
 package comProyectoPOO.ProyectoBackend.model.registroUsuario;
 
+import java.time.LocalDate;
+import java.time.Period;
+
 import javax.persistence.*;
 
 import org.openxava.annotations.*;
@@ -36,5 +39,29 @@ public abstract class Usuario {
 	@Column(length = 150)
 	@Required
 	private String email;
+
+	@Required
+	private LocalDate fechaNacimiento;
+
+	@Column(length = 100)
+	@Required
+	private String departamento;
+
+	@Column(length = 100)
+	@Required
+	private String municipio;
+
+	@Column(length = 100)
+	@Required
+	private String comunidad;
+
+	@Transient
+	@Depends("fechaNacimiento")
+	public int getEdad() {
+		if (fechaNacimiento == null) {
+			return 0;
+		}
+		return Period.between(fechaNacimiento, LocalDate.now()).getYears();
+	}
 
 }

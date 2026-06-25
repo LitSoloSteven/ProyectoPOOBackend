@@ -30,7 +30,7 @@ public class ReporteEvaluador {
 	private LocalDateTime fechaGeneracion;
 
 	@Column(length = 2000)
-	private String observacionesPsicologo;
+	private String observacionesEvaluador;
 
 	private Boolean requiereEntrevista;
 

@@ -7,8 +7,8 @@ import org.openxava.annotations.*;
 import lombok.*;
 
 /**
- * Estudiante activo de educación secundaria que aplica como aspirante.
- * Hereda de Usuario. Almacena datos de su centro educativo y grado actual.
+ * Estudiante de educación secundaria.
+ * Hereda de Usuario. Almacena datos de su centro educativo, año cursado y tipo de institución.
  */
 @Entity
 @Table(name = "estudiante_secundaria")
@@ -19,6 +19,10 @@ public class EstudianteSecundaria extends Usuario {
 	@Column(length = 150)
 	private String nombreEscuelaSecundaria;
 
-	private Integer gradoActual;
+	private Integer anioCursado;
+
+	@Column(length = 50)
+	@Required
+	private String tipoInstitucion; // Público o Privado
 
 }

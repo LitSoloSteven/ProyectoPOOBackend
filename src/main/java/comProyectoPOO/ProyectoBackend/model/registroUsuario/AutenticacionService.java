@@ -10,29 +10,30 @@ import org.openxava.jpa.*;
  * y registro de aspirantes externos.
  *
  * Según el diagrama UML:
- * - loginAdministrativo(cif, contrasena) : Psicologo
- * - accesoUniversitario(cif) : EstudianteUniversitario
- * - registrarAspiranteExterno(datos) : Usuario
+ * - loginAdministrativo(cif, contrasena) : Evaluador
+ * 
+ * TODO: En un sistema en producción, las contraseñas deben estar encriptadas (ej. con BCrypt)
+ * y la comparación debe usar un PasswordEncoder.
  */
 public class AutenticacionService {
 
 	/**
-	 * Autentica a un psicólogo evaluador con su CIF y contraseña.
-	 *
-	 * @param cif Código de identificación del psicólogo
-	 * @param contrasena Contraseña en texto plano (se compara con la encriptada)
-	 * @return Psicologo autenticado, o null si las credenciales son inválidas
+	 * Intenta autenticar a un Psicólogo / Administrador.
+	 * 
+	 * @param cif El CIF del psicólogo.
+	 * @param contrasena La contraseña en texto plano (para el prototipo).
+	 * @return Evaluador autenticado, o null si las credenciales son inválidas
 	 */
-	public Psicologo loginAdministrativo(String cif, String contrasena) {
+	public Evaluador loginAdministrativo(String cif, String contrasena) {
+		EntityManager em = XPersistence.getManager();
 		try {
-			EntityManager em = XPersistence.getManager();
-			Psicologo psicologo = (Psicologo) em.createQuery(
-				"SELECT p FROM Psicologo p WHERE p.cif = :cif")
+			Evaluador evaluador = (Evaluador) em.createQuery(
+				"SELECT p FROM Evaluador p WHERE p.cif = :cif")
 				.setParameter("cif", cif)
 				.getSingleResult();
 
-			if (psicologo != null && verificarContrasena(contrasena, psicologo.getContrasenaEncriptada())) {
-				return psicologo;
+			if (evaluador != null && verificarContrasena(contrasena, evaluador.getContrasenaEncriptada())) {
+				return evaluador;
 			}
 			return null;
 		} catch (NoResultException e) {
@@ -86,7 +87,7 @@ public class AutenticacionService {
 			// Es un estudiante de secundaria activo
 			EstudianteSecundaria estudiante = new EstudianteSecundaria();
 			estudiante.setNombreEscuelaSecundaria(nombreEscuela);
-			estudiante.setGradoActual(gradoActual);
+			estudiante.setAnioCursado(gradoActual);
 			nuevo = estudiante;
 		}
 

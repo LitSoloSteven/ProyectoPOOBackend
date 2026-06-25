@@ -26,7 +26,7 @@
 		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteUniversitario</class>
 		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EgresadoSecundaria</class>
 		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.EstudianteSecundaria</class>
-		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.Psicologo</class>
+		<class>comProyectoPOO.ProyectoBackend.model.registroUsuario.Evaluador</class>
 
 		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ConfiguracionTestRazonamiento</class>
 		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.PreguntaSerie</class>
@@ -37,9 +37,11 @@
 		<class>comProyectoPOO.ProyectoBackend.model.resultaTestSeries.ReporteEvaluador</class>
 
 		<properties>
-			<property name="javax.persistence.schema-generation.database.action" value="none"/>
+			<property name="javax.persistence.schema-generation.database.action" value="update"/>
 			<property name="hibernate.hbm2ddl.auto" value="update"/>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.format_sql" value="true"/>
 		</properties>
 	</persistence-unit>
 
