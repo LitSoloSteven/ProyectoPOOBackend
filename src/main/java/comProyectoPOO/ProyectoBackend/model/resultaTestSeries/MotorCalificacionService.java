@@ -29,29 +29,19 @@ public class MotorCalificacionService {
 	 * @param intento La prueba de razonamiento a calificar
 	 * @return La puntuación directa total (RT)
 	 */
-	public Integer calcularPuntuacionDirecta(PruebaDeRazonamiento intento) {
-		EntityManager em = XPersistence.getManager();
-
-		// Obtener todas las respuestas del intento con sus alternativas cargadas
-		List<RespuestaEstudiante> respuestas = em.createQuery(
-			"SELECT r FROM RespuestaEstudiante r " +
-			"JOIN FETCH r.alternativaSeleccionada " +
-			"WHERE r.prueba.id = :pruebaId",
-			RespuestaEstudiante.class)
-			.setParameter("pruebaId", intento.getId())
-			.getResultList();
-
+	public Integer calcularPuntuacionDirecta(PruebaDeRazonamiento intento, List<RespuestaEstudiante> respuestas) {
 		// Contar aciertos: sumar 1 por cada alternativa seleccionada que sea correcta
 		int aciertos = 0;
-		for (RespuestaEstudiante respuesta : respuestas) {
-			if (respuesta.getAlternativaSeleccionada() != null
-					&& respuesta.getAlternativaSeleccionada().isEsCorrecta()) {
-				aciertos++;
+		if (respuestas != null) {
+			for (RespuestaEstudiante respuesta : respuestas) {
+				if (respuesta.getAlternativaSeleccionada() != null
+						&& respuesta.getAlternativaSeleccionada().isEsCorrecta()) {
+					aciertos++;
+				}
 			}
 		}
 
-		// Asignar la puntuación directa al intento (sin merge redundante;
-		// la persistencia se delega al método calificarCompleto que invoca este flujo)
+		// Asignar la puntuación directa al intento
 		intento.setPuntuacionDirectaObtenida(aciertos);
 
 		return aciertos;
@@ -112,17 +102,7 @@ public class MotorCalificacionService {
 		}
 	}
 
-	/**
-	 * Ejecuta el flujo completo de calificación:
-	 * 1. Valida tiempo
-	 * 2. Calcula puntuación directa (RT)
-	 * 3. Convierte a percentil
-	 * 4. Persiste los resultados
-	 * 
-	 * @param intento La prueba de razonamiento a calificar completamente
-	 * @return La puntuación directa total (RT)
-	 */
-	public Integer calificarCompleto(PruebaDeRazonamiento intento) {
+	public Integer calificarCompleto(PruebaDeRazonamiento intento, List<RespuestaEstudiante> respuestas) {
 		EntityManager em = XPersistence.getManager();
 
 		// 1. Validar cumplimiento de tiempo
@@ -133,8 +113,8 @@ public class MotorCalificacionService {
 			intento.setEstado("FINALIZADO");
 		}
 
-		// 2. Calcular puntuación directa (RT = total de aciertos)
-		Integer rt = calcularPuntuacionDirecta(intento);
+		// 2. Calcular puntuación directa (RT = total de aciertos) usando la lista en memoria
+		Integer rt = calcularPuntuacionDirecta(intento, respuestas);
 
 		// 3. Convertir a percentil según baremos de Nicaragua
 		Integer percentil = calcularPercentil(rt);
@@ -144,6 +124,22 @@ public class MotorCalificacionService {
 		em.merge(intento);
 
 		return rt;
+	}
+
+	/**
+	 * Variante para cuando no se proveen las respuestas en memoria (las consulta de BD).
+	 */
+	public Integer calificarCompleto(PruebaDeRazonamiento intento) {
+		EntityManager em = XPersistence.getManager();
+		List<RespuestaEstudiante> respuestas = em.createQuery(
+			"SELECT r FROM RespuestaEstudiante r " +
+			"JOIN FETCH r.alternativaSeleccionada " +
+			"WHERE r.prueba.id = :pruebaId",
+			RespuestaEstudiante.class)
+			.setParameter("pruebaId", intento.getId())
+			.getResultList();
+		
+		return calificarCompleto(intento, respuestas);
 	}
 
 }

@@ -150,6 +150,7 @@ public class TestRazonamientoServlet extends HttpServlet {
 
                 prueba.setHoraFinalizacion(java.time.LocalDateTime.now());
 
+                List<comProyectoPOO.ProyectoBackend.model.resultaTestSeries.RespuestaEstudiante> guardadas = new java.util.ArrayList<>();
                 if (respuestas != null) {
                     for (java.util.Map<String, String> item : respuestas) {
                         comProyectoPOO.ProyectoBackend.model.resultaTestSeries.RespuestaEstudiante respuesta = new comProyectoPOO.ProyectoBackend.model.resultaTestSeries.RespuestaEstudiante();
@@ -160,12 +161,13 @@ public class TestRazonamientoServlet extends HttpServlet {
                         respuesta.setAlternativaSeleccionada(alternativa);
                         
                         em.persist(respuesta);
+                        guardadas.add(respuesta);
                     }
                 }
                 em.flush(); // Guardamos respuestas para que el motor las encuentre
 
                 comProyectoPOO.ProyectoBackend.model.resultaTestSeries.MotorCalificacionService motor = new comProyectoPOO.ProyectoBackend.model.resultaTestSeries.MotorCalificacionService();
-                Integer puntuacion = motor.calificarCompleto(prueba);
+                Integer puntuacion = motor.calificarCompleto(prueba, guardadas);
                 
                 java.util.Map<String, Object> resMap = new java.util.HashMap<>();
                 resMap.put("estado", prueba.getEstado());
